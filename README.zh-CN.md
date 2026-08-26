@@ -4,8 +4,6 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
-[loan.motoish.dev](https://loan.motoish.dev)
-
 ## 功能
 
 - 比较变动利率、固定期限利率和全期间固定利率。

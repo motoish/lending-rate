@@ -4,8 +4,6 @@ A bilingual website for comparing Japanese home loan rates in Chinese and Japane
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
-[loan.motoish.dev](https://loan.motoish.dev)
-
 ## Features
 
 - Compare variable, fixed-term, and full-term fixed home loan rates.

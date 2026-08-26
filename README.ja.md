@@ -4,8 +4,6 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
-[loan.motoish.dev](https://loan.motoish.dev)
-
 ## 特徴
 
 - 変動金利、固定金利、全期間固定金利を比較できます。
