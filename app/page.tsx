@@ -1,6 +1,7 @@
 "use client"
 
 import ratesData from "@src/data/rates.json"
+import trendsData from "@src/data/trends.json"
 import {
   formatRateDate,
   isRatesPayload,
@@ -9,12 +10,15 @@ import {
   type RatesPayload,
   type RateType,
 } from "@src/lib/rates"
+import { isTrendsPayload, type TrendBankId, type TrendsPayload } from "@src/lib/trends"
 import { useEffect, useMemo, useState } from "react"
 
 type Locale = "zh" | "ja"
 
 if (!isRatesPayload(ratesData)) throw new Error("Bundled rates data is invalid")
 const bundledRates = ratesData
+if (!isTrendsPayload(trendsData)) throw new Error("Bundled trends data is invalid")
+const bundledTrends = trendsData
 
 const copy = {
   zh: {
@@ -35,10 +39,11 @@ const copy = {
     fixedScope: "表内含固定2年与固定3年，期限不同不可直接比较。",
     fullScope: "フラット35与银行自营全期间固定混排，产品类型不同不可直接比较。",
     rank: "排名",
-    trendTitle: "五大银行利率变化",
-    trendDesc: "未来将加入三菱UFJ、三井住友、瑞穗、りそな、三井住友信託近1/3/5年的变化折线图。",
-    coming: "趋势图即将上线",
-    trendNote: "数据结构已预留，后续接入月度快照后自动绘制。",
+    trendTitle: "五大银行变动利率变化",
+    trendPeriod: "近1年",
+    trendScope: "新借款・下限利率・每月",
+    trendUpdated: "更新至",
+    trendAria: "五大银行近一年变动利率折线图",
     method1: "本页显示価格.com公布的适用利率下限或最低值，并保留贷款产品名称。",
     method2:
       "同一银行可能有多个产品；审核结果、借入比例、团信、手续费和地区条件都会影响最终适用利率。",
@@ -67,11 +72,11 @@ const copy = {
     fullScope:
       "フラット35と銀行独自の全期間固定が混在しており、商品タイプが違うため直接比較できません。",
     rank: "順位",
-    trendTitle: "5大銀行の金利推移",
-    trendDesc:
-      "三菱UFJ・三井住友・みずほ・りそな・三井住友信託の直近1/3/5年の推移グラフを追加予定です。",
-    coming: "推移グラフは準備中",
-    trendNote: "データ構造を先に用意しています。月次スナップショット追加後に自動描画します。",
+    trendTitle: "5大銀行の変動金利推移",
+    trendPeriod: "直近1年",
+    trendScope: "新規借入・下限金利・月次",
+    trendUpdated: "更新",
+    trendAria: "5大銀行の直近1年間の変動金利折れ線グラフ",
     method1:
       "価格.comに掲載された適用金利の下限値、または最低金利を掲載しています。商品名も残しています。",
     method2:
@@ -98,8 +103,14 @@ function localizedField(entry: RateEntry, locale: Locale, field: "product" | "te
 }
 
 const visibleRowCount = 5
-const isTrendReady = false
 const localeStorageKey = "lending-rate-locale"
+const trendColors: Record<TrendBankId, string> = {
+  mufg: "#c23b33",
+  smbc: "#16705c",
+  mizuho: "#315f85",
+  risona: "#9a6718",
+  smtb: "#70558f",
+}
 
 function htmlLang(locale: Locale) {
   return locale === "ja" ? "ja" : "zh-CN"
@@ -163,7 +174,7 @@ function RateTable({
           </thead>
           <tbody>
             {visibleEntries.map((entry, index) => (
-              <tr key={`${type}-${entry.bank}-${entry.term}`}>
+              <tr key={`${type}-${entry.bank}-${entry.product}-${entry.term}`}>
                 <td className="rank">#{String(index + 1).padStart(2, "0")}</td>
                 <td className="bank-cell">
                   <div className="bank-name">{entry.bank}</div>
@@ -201,9 +212,141 @@ function RateTable({
   )
 }
 
-export function LendingRatePage({ initialRates }: { initialRates: RatesPayload }) {
+function formatTrendMonth(month: string, locale: Locale) {
+  const [year, value] = month.split("-")
+  return new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "zh-CN", {
+    year: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(`${year}-${value}-01T00:00:00Z`))
+}
+
+function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayload }) {
+  const t = copy[locale]
+  const width = 960
+  const height = 320
+  const left = 54
+  const right = 18
+  const top = 18
+  const bottom = 42
+  const months = Array.from(
+    new Set(trends.series.flatMap((series) => series.points.map((point) => point.month))),
+  )
+    .sort()
+    .slice(-12)
+  const rates = trends.series.flatMap((series) =>
+    series.points.filter((point) => months.includes(point.month)).map((point) => point.rate),
+  )
+  const minimum = Math.floor(Math.min(...rates) * 10) / 10
+  const maximum = Math.ceil(Math.max(...rates) * 10) / 10
+  const upper = maximum === minimum ? maximum + 0.1 : maximum
+  const plotWidth = width - left - right
+  const plotHeight = height - top - bottom
+  const x = (month: string) =>
+    left + (months.indexOf(month) / Math.max(months.length - 1, 1)) * plotWidth
+  const y = (rate: number) => top + ((upper - rate) / (upper - minimum)) * plotHeight
+  const yTicks = Array.from({ length: 5 }, (_, index) => minimum + ((upper - minimum) * index) / 4)
+  const visibleLabels = new Set([0, 3, 6, 9, months.length - 1])
+
+  return (
+    <section id="trend" className="trend-section">
+      <div className="trend-heading">
+        <div>
+          <h2>{t.trendTitle}</h2>
+          <p>{t.trendScope}</p>
+        </div>
+        <div className="trend-meta">
+          <strong>{t.trendPeriod}</strong>
+          <span>
+            {t.trendUpdated} {formatRateDate(trends.updatedAt, locale)}
+          </span>
+        </div>
+      </div>
+      <div className="trend-chart-scroll">
+        <svg
+          className="trend-chart"
+          viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          aria-label={t.trendAria}
+        >
+          <title>{t.trendAria}</title>
+          {yTicks.map((tick) => (
+            <g key={tick}>
+              <line className="trend-grid" x1={left} x2={width - right} y1={y(tick)} y2={y(tick)} />
+              <text className="trend-axis-label" x={left - 10} y={y(tick) + 4} textAnchor="end">
+                {tick.toFixed(2)}%
+              </text>
+            </g>
+          ))}
+          {months.map((month, index) =>
+            visibleLabels.has(index) ? (
+              <text
+                className="trend-axis-label"
+                key={month}
+                x={x(month)}
+                y={height - 14}
+                textAnchor={index === 0 ? "start" : index === months.length - 1 ? "end" : "middle"}
+              >
+                {month.replace("-", "/")}
+              </text>
+            ) : null,
+          )}
+          {trends.series.map((series) => {
+            const points = series.points.filter((point) => months.includes(point.month))
+            const color = trendColors[series.bankId]
+            return (
+              <g key={series.bankId}>
+                <polyline
+                  className="trend-line"
+                  points={points.map((point) => `${x(point.month)},${y(point.rate)}`).join(" ")}
+                  stroke={color}
+                />
+                {points.map((point) => (
+                  <circle
+                    className="trend-point"
+                    key={point.month}
+                    cx={x(point.month)}
+                    cy={y(point.rate)}
+                    r="3"
+                    fill={color}
+                  >
+                    <title>{`${locale === "zh" ? series.bankZh : series.bank}・${formatTrendMonth(point.month, locale)}・${point.rate.toFixed(3)}%`}</title>
+                  </circle>
+                ))}
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+      <ul className="trend-legend">
+        {trends.series.map((series) => {
+          const latest = series.points.at(-1)
+          return (
+            <li key={series.bankId}>
+              <span
+                className="trend-swatch"
+                style={{ backgroundColor: trendColors[series.bankId] }}
+              />
+              <span>{locale === "zh" ? series.bankZh : series.bank}</span>
+              <strong>{latest?.rate.toFixed(3)}%</strong>
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}
+
+export function LendingRatePage({
+  initialRates,
+  initialTrends = bundledTrends,
+}: {
+  initialRates: RatesPayload
+  initialTrends?: TrendsPayload
+}) {
   const [locale, setLocale] = useState<Locale>("zh")
   const [rates, setRates] = useState(initialRates)
+  const [trends, setTrends] = useState(initialTrends)
   const [isHydrated, setIsHydrated] = useState(false)
   const t = copy[locale]
   const summary = useMemo(
@@ -215,6 +358,24 @@ export function LendingRatePage({ initialRates }: { initialRates: RatesPayload }
     const saved = readStoredLocale()
     if (saved) setLocale(saved)
     setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    void fetch("/api/trends", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Trends request failed with ${response.status}`)
+        return response.json()
+      })
+      .then((value: unknown) => {
+        if (isTrendsPayload(value)) setTrends(value)
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+      })
+
+    return () => controller.abort()
   }, [])
 
   useEffect(() => {
@@ -286,20 +447,7 @@ export function LendingRatePage({ initialRates }: { initialRates: RatesPayload }
         {rateTypes.map((key) => (
           <RateTable key={key} locale={locale} type={key} entries={rates[key]} />
         ))}
-        {/* TODO: show five-bank rate trends once monthly snapshots exist in data/trends.json. */}
-        {isTrendReady ? (
-          <section id="trend" className="trend-section">
-            <div className="trend-copy">
-              <div className="section-kicker">{t.navTrend}</div>
-              <h2>{t.trendTitle}</h2>
-              <p>{t.trendDesc}</p>
-            </div>
-            <div className="trend-status" aria-label={t.coming}>
-              <strong>{t.coming}</strong>
-              <span>{t.trendNote}</span>
-            </div>
-          </section>
-        ) : null}
+        <RateTrendChart locale={locale} trends={trends} />
         <section id="method" className="method-section">
           <p className="method-label">{t.navMethod}</p>
           <ol>
@@ -321,5 +469,5 @@ export function LendingRatePage({ initialRates }: { initialRates: RatesPayload }
 }
 
 export default function Home() {
-  return <LendingRatePage initialRates={bundledRates} />
+  return <LendingRatePage initialRates={bundledRates} initialTrends={bundledTrends} />
 }

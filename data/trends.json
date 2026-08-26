@@ -1,6 +1,110 @@
 {
-  "status": "planned",
-  "banks": ["三菱ＵＦＪ銀行", "三井住友銀行", "みずほ銀行", "りそな銀行", "三井住友信託銀行"],
-  "periods": ["1年", "3年", "5年"],
-  "series": []
+  "version": 1,
+  "updatedAt": "2026-08-01",
+  "fetchedAt": "2026-08-26T21:12:35.794Z",
+  "rateType": "variable",
+  "loanType": "new",
+  "rateBoundary": "lower",
+  "series": [
+    {
+      "bankId": "mufg",
+      "companyCode": "008",
+      "bank": "三菱ＵＦＪ銀行",
+      "bankZh": "三菱UFJ银行",
+      "points": [
+        { "month": "2025-09", "rate": 0.595 },
+        { "month": "2025-10", "rate": 0.595 },
+        { "month": "2025-11", "rate": 0.595 },
+        { "month": "2025-12", "rate": 0.67 },
+        { "month": "2026-01", "rate": 0.67 },
+        { "month": "2026-02", "rate": 0.67 },
+        { "month": "2026-03", "rate": 0.945 },
+        { "month": "2026-04", "rate": 0.945 },
+        { "month": "2026-05", "rate": 0.945 },
+        { "month": "2026-06", "rate": 0.945 },
+        { "month": "2026-07", "rate": 0.945 },
+        { "month": "2026-08", "rate": 0.945 }
+      ]
+    },
+    {
+      "bankId": "smbc",
+      "companyCode": "010",
+      "bank": "三井住友銀行",
+      "bankZh": "三井住友银行",
+      "points": [
+        { "month": "2025-09", "rate": 0.925 },
+        { "month": "2025-10", "rate": 0.925 },
+        { "month": "2025-11", "rate": 0.925 },
+        { "month": "2025-12", "rate": 0.925 },
+        { "month": "2026-01", "rate": 0.925 },
+        { "month": "2026-02", "rate": 0.925 },
+        { "month": "2026-03", "rate": 1.175 },
+        { "month": "2026-04", "rate": 1.275 },
+        { "month": "2026-05", "rate": 1.275 },
+        { "month": "2026-06", "rate": 1.275 },
+        { "month": "2026-07", "rate": 1.275 },
+        { "month": "2026-08", "rate": 1.275 }
+      ]
+    },
+    {
+      "bankId": "mizuho",
+      "companyCode": "009",
+      "bank": "みずほ銀行",
+      "bankZh": "瑞穗银行",
+      "points": [
+        { "month": "2025-09", "rate": 0.525 },
+        { "month": "2025-10", "rate": 0.775 },
+        { "month": "2025-11", "rate": 0.775 },
+        { "month": "2025-12", "rate": 0.775 },
+        { "month": "2026-01", "rate": 0.775 },
+        { "month": "2026-02", "rate": 0.775 },
+        { "month": "2026-03", "rate": 0.775 },
+        { "month": "2026-04", "rate": 1.025 },
+        { "month": "2026-05", "rate": 1.025 },
+        { "month": "2026-06", "rate": 1.025 },
+        { "month": "2026-07", "rate": 1.025 },
+        { "month": "2026-08", "rate": 1.025 }
+      ]
+    },
+    {
+      "bankId": "risona",
+      "companyCode": "013",
+      "bank": "りそな銀行",
+      "bankZh": "りそな银行",
+      "points": [
+        { "month": "2025-09", "rate": 0.64 },
+        { "month": "2025-10", "rate": 0.64 },
+        { "month": "2025-11", "rate": 0.64 },
+        { "month": "2025-12", "rate": 0.64 },
+        { "month": "2026-01", "rate": 0.64 },
+        { "month": "2026-02", "rate": 0.64 },
+        { "month": "2026-03", "rate": 0.64 },
+        { "month": "2026-04", "rate": 0.95 },
+        { "month": "2026-05", "rate": 0.95 },
+        { "month": "2026-06", "rate": 0.95 },
+        { "month": "2026-07", "rate": 0.95 },
+        { "month": "2026-08", "rate": 0.95 }
+      ]
+    },
+    {
+      "bankId": "smtb",
+      "companyCode": "017",
+      "bank": "三井住友信託銀行",
+      "bankZh": "三井住友信托银行",
+      "points": [
+        { "month": "2025-09", "rate": 0.78 },
+        { "month": "2025-10", "rate": 0.78 },
+        { "month": "2025-11", "rate": 0.78 },
+        { "month": "2025-12", "rate": 0.78 },
+        { "month": "2026-01", "rate": 0.78 },
+        { "month": "2026-02", "rate": 0.78 },
+        { "month": "2026-03", "rate": 0.78 },
+        { "month": "2026-04", "rate": 1.13 },
+        { "month": "2026-05", "rate": 1.13 },
+        { "month": "2026-06", "rate": 1.13 },
+        { "month": "2026-07", "rate": 1.13 },
+        { "month": "2026-08", "rate": 1.13 }
+      ]
+    }
+  ]
 }

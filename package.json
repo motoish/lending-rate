@@ -12,6 +12,7 @@
     "lint": "oxlint app lib scripts test vite.config.ts next.config.ts --deny-warnings",
     "test": "bun test",
     "refresh-rates": "bun scripts/rates-refresh.ts",
+    "refresh-trends": "bun scripts/trends-refresh.ts",
     "deploy": "wrangler deploy"
   },
   "dependencies": {

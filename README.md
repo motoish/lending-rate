@@ -11,7 +11,7 @@ A bilingual website for comparing Japanese home loan rates in Chinese and Japane
 - Start in Chinese and switch to Japanese at any time.
 - Keep the selected language between visits.
 - Use a compact, responsive layout on desktop and mobile.
-- Reserve monthly trend data for future 1, 3, and 5-year charts.
+- View one year of monthly variable-rate history for five major banks.
 
 ## Quick Start
 
@@ -26,16 +26,17 @@ Open [http://localhost:6565](http://localhost:6565).
 
 ## Commands
 
-| Command                                          | Description                         |
-| ------------------------------------------------ | ----------------------------------- |
-| `bun run dev`                                    | Start the local development server  |
-| `bun test`                                       | Run the test suite                  |
-| `bun run lint`                                   | Check the code with Oxlint          |
-| `bun run format`                                 | Format the project with Oxfmt       |
-| `bun run format:check`                           | Check formatting without changes    |
-| `bun run build`                                  | Create the production build         |
-| `bun run refresh-rates --output /tmp/rates.json` | Fetch and validate the latest rates |
-| `bun run deploy`                                 | Deploy the build with Wrangler      |
+| Command                                            | Description                         |
+| -------------------------------------------------- | ----------------------------------- |
+| `bun run dev`                                      | Start the local development server  |
+| `bun test`                                         | Run the test suite                  |
+| `bun run lint`                                     | Check the code with Oxlint          |
+| `bun run format`                                   | Format the project with Oxfmt       |
+| `bun run format:check`                             | Check formatting without changes    |
+| `bun run build`                                    | Create the production build         |
+| `bun run refresh-rates --output /tmp/rates.json`   | Fetch and validate the latest rates |
+| `bun run refresh-trends --output /tmp/trends.json` | Fetch and merge bank rate history   |
+| `bun run deploy`                                   | Deploy the build with Wrangler      |
 
 ## Rate Data
 
@@ -48,8 +49,10 @@ Each category is accepted only when it contains ten valid plans sorted by numeri
 Kakaku.com pages must also report the same source date before KV is updated. Existing Chinese copy
 is preserved when a plan matches the bundled data; new plans fall back to Japanese until translated.
 
-Future chart configuration lives in [`data/trends.json`](data/trends.json). The trend section
-remains hidden until monthly snapshots are available.
+The same workflow fetches 12 months of lower variable rates for MUFG, SMBC, Mizuho, Resona, and
+Sumitomo Mitsui Trust. It merges them with `rates:trends:v1` in KV and retains up to 60 monthly
+points per bank. [`data/trends.json`](data/trends.json) is the bundled fallback. The site currently
+shows the latest year; 3 and 5-year views can be enabled as bank-specific history accumulates.
 
 ## Deployment
 

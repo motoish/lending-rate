@@ -30,9 +30,8 @@ test("renders the source month and rates from the supplied payload", () => {
   }
   const html = renderToStaticMarkup(<LendingRatePage initialRates={current} />)
 
-  expect(html).toContain("2026年9月")
+  expect(html).toContain('<div class="hero-meta"><span>数据更新 <strong>2026年9月</strong>')
   expect(html).toContain("0.777%")
-  expect(html).not.toContain("2026年8月")
 })
 
 test("keeps the kakaku source attribution only in the footer", () => {
@@ -152,12 +151,16 @@ test("shows five rate rows by default and offers to expand the rest", () => {
   expect(html).not.toContain("#06")
 })
 
-test("hides the unfinished rate-trend section until snapshots exist", () => {
+test("renders the one-year five-bank variable-rate trend", () => {
   const html = renderToStaticMarkup(<Home />)
 
-  expect(html).not.toContain('id="trend"')
+  expect(html).toContain('id="trend"')
+  expect(html).toContain("五大银行变动利率变化")
+  expect(html).toContain("近1年")
+  expect(html).toContain("<svg")
+  expect(html).toContain("三菱UFJ银行")
+  expect(html).toContain("三井住友信托银行")
   expect(html).not.toContain("趋势图即将上线")
-  expect(html).not.toContain("五大银行利率变化")
 })
 
 test("keeps reading sizes at or above the review floor", async () => {

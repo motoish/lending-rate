@@ -11,7 +11,7 @@
 - 默认显示中文，并可随时切换为日文。
 - 在下次访问时保留所选择的语言。
 - 为桌面端和手机端提供紧凑的响应式布局。
-- 为未来的近1年、3年和5年利率趋势图预留月度数据。
+- 查看五大银行近一年的每月变动利率变化。
 
 ## 快速开始
 
@@ -26,16 +26,17 @@ bun run dev
 
 ## 常用命令
 
-| 命令                                             | 说明                       |
-| ------------------------------------------------ | -------------------------- |
-| `bun run dev`                                    | 启动本地开发服务器         |
-| `bun test`                                       | 运行测试                   |
-| `bun run lint`                                   | 使用 Oxlint 检查代码       |
-| `bun run format`                                 | 使用 Oxfmt 格式化项目      |
-| `bun run format:check`                           | 检查格式但不修改文件       |
-| `bun run build`                                  | 创建生产构建               |
-| `bun run refresh-rates --output /tmp/rates.json` | 抓取并校验最新利率         |
-| `bun run deploy`                                 | 使用 Wrangler 部署生产构建 |
+| 命令                                               | 说明                       |
+| -------------------------------------------------- | -------------------------- |
+| `bun run dev`                                      | 启动本地开发服务器         |
+| `bun test`                                         | 运行测试                   |
+| `bun run lint`                                     | 使用 Oxlint 检查代码       |
+| `bun run format`                                   | 使用 Oxfmt 格式化项目      |
+| `bun run format:check`                             | 检查格式但不修改文件       |
+| `bun run build`                                    | 创建生产构建               |
+| `bun run refresh-rates --output /tmp/rates.json`   | 抓取并校验最新利率         |
+| `bun run refresh-trends --output /tmp/trends.json` | 抓取并合并银行利率历史     |
+| `bun run deploy`                                   | 使用 Wrangler 部署生产构建 |
 
 ## 利率数据
 
@@ -47,8 +48,10 @@ bun run dev
 每个分类必须包含十个有效且按利率升序排列的方案，三个価格.com页面也必须使用同一个数据日期，
 否则不会更新 KV。与仓库兜底数据匹配的方案会保留现有中文译文；新方案在人工翻译前回退显示日文。
 
-未来的趋势图配置保存在 [`data/trends.json`](data/trends.json)。在月度快照数据准备完成之前，
-页面不会显示趋势图区域。
+同一工作流还会抓取三菱UFJ、三井住友、瑞穗、りそな和三井住友信托的近 12 个月变动利率下限，
+与 KV 中的 `rates:trends:v1` 合并，并为每家银行保留最多 60 个月数据。
+[`data/trends.json`](data/trends.json) 是离线兜底。页面目前展示近一年；积累足够的银行历史后即可
+开放 3 年和 5 年视图。
 
 ## 部署
 

@@ -34,6 +34,24 @@ jobs:
       - name: Fetch and validate rates
         run: bun run refresh-rates --output /tmp/rates.json
 
+      - name: Download retained trend history
+        continue-on-error: true
+        run: >
+          bunx wrangler kv key get rates:trends:v1
+          --binding RATES_KV
+          --remote
+          --text
+          > /tmp/trends-existing.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Fetch and validate trends
+        run: >
+          bun run refresh-trends
+          --existing /tmp/trends-existing.json
+          --output /tmp/trends.json
+
       - name: Upload dated snapshot to KV
         run: |
           SNAPSHOT_DATE="$(bun -e 'console.log((await Bun.file("/tmp/rates.json").json()).updatedAt)')"
@@ -46,6 +64,16 @@ jobs:
         run: >
           bunx wrangler kv key put rates:latest
           --path /tmp/rates.json
+          --binding RATES_KV
+          --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Publish retained trend history to KV
+        run: >
+          bunx wrangler kv key put rates:trends:v1
+          --path /tmp/trends.json
           --binding RATES_KV
           --remote
         env:
