@@ -1,0 +1,45 @@
+{
+  "name": "lending-rate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vinext dev --port 6565",
+    "build": "vinext build",
+    "start": "vinext start",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint app test vite.config.ts next.config.ts --deny-warnings",
+    "test": "bun test",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.54.0",
+    "@cloudflare/workers-types": "5.20260826.1",
+    "@fontsource-variable/m-plus-1-code": "5.3.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/bun": "^1.4.0",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "@vitejs/plugin-rsc": "0.5.26",
+    "oxfmt": "0.65.0",
+    "oxlint": "1.80.0",
+    "react-server-dom-webpack": "19.2.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vinext": "1.0.0-beta.3",
+    "vite": "8.0.13",
+    "wrangler": "4.126.0"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "packageManager": "bun@1.4.0"
+}
