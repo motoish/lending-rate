@@ -9,10 +9,4 @@
     "directory": "./dist/client",
     "binding": "ASSETS",
   },
-  "routes": [
-    {
-      "pattern": "loan.motoish.dev",
-      "custom_domain": true,
-    },
-  ],
 }
