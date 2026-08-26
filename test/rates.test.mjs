@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+
 import rates from "@src/data/rates.json" with { type: "json" };
 
 test("keeps ten sorted rate entries for every rate type", () => {

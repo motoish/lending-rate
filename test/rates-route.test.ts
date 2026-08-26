@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+
 import { GET } from "@src/app/api/rates/route";
 import { isRatesPayload } from "@src/lib/rates";
 

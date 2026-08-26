@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
-import { loadRates } from "@src/lib/rates-store";
+
 import { formatRateDate, type RateEntry, type RatesPayload } from "@src/lib/rates";
+import { loadRates } from "@src/lib/rates-store";
 
 function entry(index: number): RateEntry {
   const rate = 0.5 + index / 100;

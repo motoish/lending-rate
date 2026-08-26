@@ -1,7 +1,8 @@
 import { expect, test } from "bun:test";
-import { renderToStaticMarkup } from "react-dom/server";
+
 import Home, { LendingRatePage } from "@src/app/page";
 import ratesData from "@src/data/rates.json";
+import { renderToStaticMarkup } from "react-dom/server";
 
 test("puts the rate summary before supporting metadata", () => {
   const html = renderToStaticMarkup(<Home />);
