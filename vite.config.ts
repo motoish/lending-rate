@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import tailwindcss from "@tailwindcss/postcss";
 import vinext from "vinext";
 import { defineConfig } from "vite";
@@ -21,6 +23,11 @@ export default defineConfig(async () => {
 
   return {
     css: { postcss: { plugins: [tailwindcss()] } },
+    resolve: {
+      alias: {
+        "@src": fileURLToPath(new URL(".", import.meta.url)),
+      },
+    },
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,

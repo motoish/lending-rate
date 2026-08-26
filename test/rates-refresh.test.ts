@@ -2,14 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import ratesData from "../data/rates.json";
+import ratesData from "@src/data/rates.json";
 import {
   fetchLatestRates,
   kakakuUrls,
   parseKakakuPage,
   refreshRatesFile,
-} from "../scripts/rates-refresh";
-import type { RateEntry, RatesByType, RatesPayload } from "../lib/rates";
+} from "@src/scripts/rates-refresh";
+import type { RateEntry, RatesByType, RatesPayload } from "@src/lib/rates";
 
 const sourceUrl = "https://kakaku.com/housing-loan/list/list.asp?hl_itype=1&hl_ltype=2&hl_sort=2";
 

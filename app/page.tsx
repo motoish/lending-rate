@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import ratesData from "../data/rates.json";
+import ratesData from "@src/data/rates.json";
 import {
   formatRateDate,
   isRatesPayload,
@@ -9,7 +9,7 @@ import {
   type RateEntry,
   type RatesPayload,
   type RateType,
-} from "../lib/rates";
+} from "@src/lib/rates";
 
 type Locale = "zh" | "ja";
 

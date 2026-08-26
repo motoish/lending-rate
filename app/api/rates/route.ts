@@ -1,6 +1,6 @@
-import ratesData from "../../../data/rates.json";
-import { isRatesPayload } from "../../../lib/rates";
-import { loadRates } from "../../../lib/rates-store";
+import ratesData from "@src/data/rates.json";
+import { isRatesPayload } from "@src/lib/rates";
+import { loadRates } from "@src/lib/rates-store";
 
 const fallbackRates = (() => {
   if (!isRatesPayload(ratesData)) throw new Error("Bundled rates data is invalid");

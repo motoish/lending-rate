@@ -6,7 +6,7 @@ import {
   type RatesByType,
   type RatesPayload,
   type RateType,
-} from "../lib/rates";
+} from "@src/lib/rates";
 
 export const kakakuUrls: Record<RateType, string> = {
   variable: "https://kakaku.com/housing-loan/list/list.asp?hl_itype=1&hl_ltype=2&hl_sort=2",

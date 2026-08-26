@@ -1,4 +1,4 @@
-import { isRatesPayload, type RatesPayload } from "./rates";
+import { isRatesPayload, type RatesPayload } from "@src/lib/rates";
 
 export const latestRatesKey = "rates:latest";
 

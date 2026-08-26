@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { GET } from "../app/api/rates/route";
-import { isRatesPayload } from "../lib/rates";
+import { GET } from "@src/app/api/rates/route";
+import { isRatesPayload } from "@src/lib/rates";
 
 test("serves bundled rates when a Cloudflare KV binding is unavailable", async () => {
   const response = await GET();
