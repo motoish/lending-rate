@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import ratesData from "@src/data/rates.json";
+import ratesData from "@src/data/rates.json"
 import {
   formatRateDate,
   isRatesPayload,
@@ -8,13 +8,13 @@ import {
   type RateEntry,
   type RatesPayload,
   type RateType,
-} from "@src/lib/rates";
-import { useEffect, useMemo, useState } from "react";
+} from "@src/lib/rates"
+import { useEffect, useMemo, useState } from "react"
 
-type Locale = "zh" | "ja";
+type Locale = "zh" | "ja"
 
-if (!isRatesPayload(ratesData)) throw new Error("Bundled rates data is invalid");
-const bundledRates = ratesData;
+if (!isRatesPayload(ratesData)) throw new Error("Bundled rates data is invalid")
+const bundledRates = ratesData
 
 const copy = {
   zh: {
@@ -82,49 +82,49 @@ const copy = {
     footer: "日本の住宅ローン金利比較",
     disclaimer: "本ページは情報提供を目的とし、金融アドバイスではありません。",
   },
-} as const;
+} as const
 
 const scopeCopy = {
   variable: "variableScope",
   fixed: "fixedScope",
   full: "fullScope",
-} as const;
+} as const
 
 function localizedField(entry: RateEntry, locale: Locale, field: "product" | "term" | "note") {
   if (locale === "zh") {
-    return field === "note" ? entry.noteZh || "—" : entry[`${field}Zh`];
+    return field === "note" ? entry.noteZh || "—" : entry[`${field}Zh`]
   }
-  return field === "note" ? entry.note || "—" : entry[field];
+  return field === "note" ? entry.note || "—" : entry[field]
 }
 
-const visibleRowCount = 5;
-const isTrendReady = false;
-const localeStorageKey = "lending-rate-locale";
+const visibleRowCount = 5
+const isTrendReady = false
+const localeStorageKey = "lending-rate-locale"
 
 function htmlLang(locale: Locale) {
-  return locale === "ja" ? "ja" : "zh-CN";
+  return locale === "ja" ? "ja" : "zh-CN"
 }
 
 function readStoredLocale() {
   try {
-    const saved = window.localStorage.getItem(localeStorageKey);
-    if (saved === "ja" || saved === "zh") return saved;
+    const saved = window.localStorage.getItem(localeStorageKey)
+    if (saved === "ja" || saved === "zh") return saved
   } catch {
-    return null;
+    return null
   }
-  return null;
+  return null
 }
 
 function applyLocale(locale: Locale) {
-  document.documentElement.lang = htmlLang(locale);
-  document.title = copy[locale].footer;
+  document.documentElement.lang = htmlLang(locale)
+  document.title = copy[locale].footer
 }
 
 function persistLocale(locale: Locale) {
   try {
-    window.localStorage.setItem(localeStorageKey, locale);
+    window.localStorage.setItem(localeStorageKey, locale)
   } catch {
-    return;
+    return
   }
 }
 
@@ -133,15 +133,15 @@ function RateTable({
   type,
   entries,
 }: {
-  locale: Locale;
-  type: RateType;
-  entries: RateEntry[];
+  locale: Locale
+  type: RateType
+  entries: RateEntry[]
 }) {
-  const t = copy[locale];
-  const [isExpanded, setIsExpanded] = useState(false);
-  const isExpandable = entries.length > visibleRowCount;
-  const visibleEntries = isExpanded || !isExpandable ? entries : entries.slice(0, visibleRowCount);
-  const hiddenCount = entries.length - visibleRowCount;
+  const t = copy[locale]
+  const [isExpanded, setIsExpanded] = useState(false)
+  const isExpandable = entries.length > visibleRowCount
+  const visibleEntries = isExpanded || !isExpandable ? entries : entries.slice(0, visibleRowCount)
+  const hiddenCount = entries.length - visibleRowCount
   return (
     <section id={type} className="rate-section">
       <div className="section-heading">
@@ -198,48 +198,48 @@ function RateTable({
         ) : null}
       </div>
     </section>
-  );
+  )
 }
 
 export function LendingRatePage({ initialRates }: { initialRates: RatesPayload }) {
-  const [locale, setLocale] = useState<Locale>("zh");
-  const [rates, setRates] = useState(initialRates);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const t = copy[locale];
+  const [locale, setLocale] = useState<Locale>("zh")
+  const [rates, setRates] = useState(initialRates)
+  const [isHydrated, setIsHydrated] = useState(false)
+  const t = copy[locale]
   const summary = useMemo(
     () => rateTypes.map((key) => ({ key, value: rates[key][0].displayRate })),
     [rates],
-  );
+  )
 
   useEffect(() => {
-    const saved = readStoredLocale();
-    if (saved) setLocale(saved);
-    setIsHydrated(true);
-  }, []);
+    const saved = readStoredLocale()
+    if (saved) setLocale(saved)
+    setIsHydrated(true)
+  }, [])
 
   useEffect(() => {
-    if (!isHydrated) return;
-    applyLocale(locale);
-    persistLocale(locale);
-  }, [isHydrated, locale]);
+    if (!isHydrated) return
+    applyLocale(locale)
+    persistLocale(locale)
+  }, [isHydrated, locale])
 
   useEffect(() => {
-    const controller = new AbortController();
+    const controller = new AbortController()
 
     void fetch("/api/rates", { signal: controller.signal })
       .then((response) => {
-        if (!response.ok) throw new Error(`Rates request failed with ${response.status}`);
-        return response.json();
+        if (!response.ok) throw new Error(`Rates request failed with ${response.status}`)
+        return response.json()
       })
       .then((value: unknown) => {
-        if (isRatesPayload(value)) setRates(value);
+        if (isRatesPayload(value)) setRates(value)
       })
       .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-      });
+        if (error instanceof DOMException && error.name === "AbortError") return
+      })
 
-    return () => controller.abort();
-  }, []);
+    return () => controller.abort()
+  }, [])
 
   return (
     <main>
@@ -317,9 +317,9 @@ export function LendingRatePage({ initialRates }: { initialRates: RatesPayload }
         </a>
       </footer>
     </main>
-  );
+  )
 }
 
 export default function Home() {
-  return <LendingRatePage initialRates={bundledRates} />;
+  return <LendingRatePage initialRates={bundledRates} />
 }

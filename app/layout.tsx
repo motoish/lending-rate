@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import "@fontsource-variable/m-plus-1-code";
+import type { Metadata } from "next"
+import "@fontsource-variable/m-plus-1-code"
 
-import "./globals.css";
+import "./globals.css"
 
 export const metadata: Metadata = {
   title: "日本住宅贷款利率比较",
@@ -19,12 +19,12 @@ export const metadata: Metadata = {
     title: "日本住宅贷款利率比较",
     description: "日本住宅贷款利率比较",
   },
-};
+}
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN">
       <body>{children}</body>
     </html>
-  );
+  )
 }
