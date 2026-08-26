@@ -7,7 +7,9 @@ on:
     paths:
       - "app/**"
       - "data/**"
+      - "lib/**"
       - "public/**"
+      - "scripts/**"
       - "test/**"
       - "package.json"
       - "bun.lock"
@@ -15,8 +17,10 @@ on:
       - "next.config.ts"
       - "vite.config.ts"
       - "wrangler.jsonc"
+      - "worker-configuration.d.ts"
       - ".oxfmtrc.json"
       - ".github/workflows/deploy.yml"
+      - ".github/workflows/refresh-rates.yml"
   workflow_dispatch:
 
 permissions:

@@ -9,4 +9,9 @@
     "directory": "./dist/client",
     "binding": "ASSETS",
   },
+  "kv_namespaces": [
+    {
+      "binding": "RATES_KV",
+    },
+  ],
 }

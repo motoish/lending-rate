@@ -2,22 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ratesData from "../data/rates.json";
+import {
+  formatRateDate,
+  isRatesPayload,
+  rateTypes,
+  type RateEntry,
+  type RatesPayload,
+  type RateType,
+} from "../lib/rates";
 
 type Locale = "zh" | "ja";
-type RateType = "variable" | "fixed" | "full";
-type RateEntry = {
-  bank: string;
-  product: string;
-  productZh: string;
-  term: string;
-  termZh: string;
-  rate: number;
-  displayRate: string;
-  note: string;
-  noteZh: string;
-  source: string;
-};
-const rates = ratesData as Record<RateType, RateEntry[]>;
+
+if (!isRatesPayload(ratesData)) throw new Error("Bundled rates data is invalid");
+const bundledRates = ratesData;
 
 const copy = {
   zh: {
@@ -25,8 +22,7 @@ const copy = {
     navMethod: "说明",
     eyebrow: "日本住宅贷款利率概要",
     updated: "数据更新",
-    updatedDate: "2026年8月",
-    source: "数据来源：价格.com",
+    source: "数据来源：価格.com",
     variable: "变动利率",
     fixed: "固定利率",
     full: "全期间固定",
@@ -43,7 +39,7 @@ const copy = {
     trendDesc: "未来将加入三菱UFJ、三井住友、瑞穗、りそな、三井住友信託近1/3/5年的变化折线图。",
     coming: "趋势图即将上线",
     trendNote: "数据结构已预留，后续接入月度快照后自动绘制。",
-    method1: "本页显示价格.com公布的适用利率下限或最低值，并保留贷款产品名称。",
+    method1: "本页显示価格.com公布的适用利率下限或最低值，并保留贷款产品名称。",
     method2:
       "同一银行可能有多个产品；审核结果、借入比例、团信、手续费和地区条件都会影响最终适用利率。",
     method3: "利率会变化，签约前请务必以各银行官网和正式合同为准。",
@@ -57,7 +53,6 @@ const copy = {
     navMethod: "見方",
     eyebrow: "日本住宅ローン金利情報",
     updated: "データ基準日",
-    updatedDate: "2026年8月",
     source: "出典：価格.com",
     variable: "変動金利",
     fixed: "固定金利",
@@ -88,8 +83,6 @@ const copy = {
     disclaimer: "本ページは情報提供を目的とし、金融アドバイスではありません。",
   },
 } as const;
-
-const rateTypes: RateType[] = ["variable", "fixed", "full"];
 
 const scopeCopy = {
   variable: "variableScope",
@@ -135,9 +128,16 @@ function persistLocale(locale: Locale) {
   }
 }
 
-function RateTable({ locale, type }: { locale: Locale; type: RateType }) {
+function RateTable({
+  locale,
+  type,
+  entries,
+}: {
+  locale: Locale;
+  type: RateType;
+  entries: RateEntry[];
+}) {
   const t = copy[locale];
-  const entries = rates[type];
   const [isExpanded, setIsExpanded] = useState(false);
   const isExpandable = entries.length > visibleRowCount;
   const visibleEntries = isExpanded || !isExpandable ? entries : entries.slice(0, visibleRowCount);
@@ -201,13 +201,14 @@ function RateTable({ locale, type }: { locale: Locale; type: RateType }) {
   );
 }
 
-export default function Home() {
+export function LendingRatePage({ initialRates }: { initialRates: RatesPayload }) {
   const [locale, setLocale] = useState<Locale>("zh");
+  const [rates, setRates] = useState(initialRates);
   const [isHydrated, setIsHydrated] = useState(false);
   const t = copy[locale];
   const summary = useMemo(
     () => rateTypes.map((key) => ({ key, value: rates[key][0].displayRate })),
-    [],
+    [rates],
   );
 
   useEffect(() => {
@@ -221,6 +222,24 @@ export default function Home() {
     applyLocale(locale);
     persistLocale(locale);
   }, [isHydrated, locale]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    void fetch("/api/rates", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Rates request failed with ${response.status}`);
+        return response.json();
+      })
+      .then((value: unknown) => {
+        if (isRatesPayload(value)) setRates(value);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      });
+
+    return () => controller.abort();
+  }, []);
 
   return (
     <main>
@@ -258,14 +277,14 @@ export default function Home() {
           </div>
           <div className="hero-meta">
             <span>
-              {t.updated} <strong>{t.updatedDate}</strong>
+              {t.updated} <strong>{formatRateDate(rates.updatedAt, locale)}</strong>
             </span>
           </div>
         </section>
       </div>
       <div className="content-wrap">
         {rateTypes.map((key) => (
-          <RateTable key={key} locale={locale} type={key} />
+          <RateTable key={key} locale={locale} type={key} entries={rates[key]} />
         ))}
         {/* TODO: show five-bank rate trends once monthly snapshots exist in data/trends.json. */}
         {isTrendReady ? (
@@ -299,4 +318,8 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+export default function Home() {
+  return <LendingRatePage initialRates={bundledRates} />;
 }

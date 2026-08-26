@@ -3,7 +3,12 @@ import test from "node:test";
 import rates from "../data/rates.json" with { type: "json" };
 
 test("keeps ten sorted rate entries for every rate type", () => {
-  for (const [type, entries] of Object.entries(rates)) {
+  assert.equal(rates.version, 1);
+  assert.match(rates.updatedAt, /^\d{4}-\d{2}-\d{2}$/);
+  assert.equal(rates.fetchedAt, null);
+
+  for (const type of ["variable", "fixed", "full"]) {
+    const entries = rates[type];
     assert.equal(entries.length, 10, `${type} should contain ten entries`);
     assert.ok(
       entries.every((entry) => typeof entry.bank === "string" && entry.bank.length > 0),

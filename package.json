@@ -9,8 +9,9 @@
     "start": "vinext start",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "lint": "oxlint app test vite.config.ts next.config.ts --deny-warnings",
+    "lint": "oxlint app lib scripts test vite.config.ts next.config.ts --deny-warnings",
     "test": "bun test",
+    "refresh-rates": "bun scripts/rates-refresh.ts",
     "deploy": "wrangler deploy"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
+    "cheerio": "^1.2.0",
     "oxfmt": "0.65.0",
     "oxlint": "1.80.0",
     "react-server-dom-webpack": "19.2.6",

@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import Home from "../app/page";
+import Home, { LendingRatePage } from "../app/page";
+import ratesData from "../data/rates.json";
 
 test("puts the rate summary before supporting metadata", () => {
   const html = renderToStaticMarkup(<Home />);
@@ -13,6 +14,24 @@ test("puts the rate summary before supporting metadata", () => {
   expect(summary).toContain("固定利率（最低）");
   expect(summary).toContain("全期间固定（最低）");
   expect(summary).not.toContain("↗");
+});
+
+test("renders the source month and rates from the supplied payload", () => {
+  const current = {
+    ...ratesData,
+    version: 1 as const,
+    updatedAt: "2026-09-01",
+    fetchedAt: "2026-09-01T01:00:00.000Z",
+    variable: [
+      { ...ratesData.variable[0], rate: 0.777, displayRate: "0.777%" },
+      ...ratesData.variable.slice(1),
+    ],
+  };
+  const html = renderToStaticMarkup(<LendingRatePage initialRates={current} />);
+
+  expect(html).toContain("2026年9月");
+  expect(html).toContain("0.777%");
+  expect(html).not.toContain("2026年8月");
 });
 
 test("keeps the kakaku source attribution only in the footer", () => {
