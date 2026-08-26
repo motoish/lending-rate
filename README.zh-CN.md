@@ -26,27 +26,26 @@ bun run dev
 
 ## 常用命令
 
-| 命令                   | 说明                       |
-| ---------------------- | -------------------------- |
-| `bun run dev`          | 启动本地开发服务器         |
-| `bun test`             | 运行测试                   |
-| `bun run lint`         | 使用 Oxlint 检查代码       |
-| `bun run format`       | 使用 Oxfmt 格式化项目      |
-| `bun run format:check` | 检查格式但不修改文件       |
-| `bun run build`        | 创建生产构建               |
-| `bun run deploy`       | 使用 Wrangler 部署生产构建 |
+| 命令                                             | 说明                       |
+| ------------------------------------------------ | -------------------------- |
+| `bun run dev`                                    | 启动本地开发服务器         |
+| `bun test`                                       | 运行测试                   |
+| `bun run lint`                                   | 使用 Oxlint 检查代码       |
+| `bun run format`                                 | 使用 Oxfmt 格式化项目      |
+| `bun run format:check`                           | 检查格式但不修改文件       |
+| `bun run build`                                  | 创建生产构建               |
+| `bun run refresh-rates --output /tmp/rates.json` | 抓取并校验最新利率         |
+| `bun run deploy`                                 | 使用 Wrangler 部署生产构建 |
 
 ## 利率数据
 
-当前利率保存在 [`data/rates.json`](data/rates.json)。每条记录包括金融机构、产品名称、期限、
-展示利率、适用条件、来源地址，以及需要时使用的中文译文。
+生产环境的最新利率来自 Cloudflare KV binding `RATES_KV`。GitHub Actions 每天日本时间上午
+10 点抓取并校验価格.com，然后写入 `rates:latest` 和按日期保存的
+`rates:snapshot:YYYY-MM-DD`。[`data/rates.json`](data/rates.json) 用于本地开发、首次部署和 KV
+暂时不可用时的兜底。
 
-更新利率时：
-
-1. 每个利率分类保留十条记录。
-2. 按数值字段 `rate` 从低到高排序。
-3. 更新 `app/page.tsx` 中显示的数据日期。
-4. 运行 `bun test` 验证数据。
+每个分类必须包含十个有效且按利率升序排列的方案，三个価格.com页面也必须使用同一个数据日期，
+否则不会更新 KV。与仓库兜底数据匹配的方案会保留现有中文译文；新方案在人工翻译前回退显示日文。
 
 未来的趋势图配置保存在 [`data/trends.json`](data/trends.json)。在月度快照数据准备完成之前，
 页面不会显示趋势图区域。
@@ -55,6 +54,9 @@ bun run dev
 
 推送到 `main` 后，[GitHub Actions](.github/workflows/deploy.yml) 会自动执行部署。工作流使用 Bun
 安装依赖，运行测试和 Oxc 检查，构建网站，并通过 Wrangler 部署 `lending-rate` Worker。
+
+[利率刷新工作流](.github/workflows/refresh-rates.yml) 每天日本时间上午 10 点运行，也支持手动启动。
+首次部署时，Wrangler 会自动创建 `RATES_KV` namespace 并将其绑定到 Worker。
 
 运行工作流前，请在仓库中配置以下 secrets：
 

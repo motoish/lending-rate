@@ -26,27 +26,27 @@ bun run dev
 
 ## コマンド
 
-| コマンド               | 説明                                     |
-| ---------------------- | ---------------------------------------- |
-| `bun run dev`          | ローカル開発サーバーを起動               |
-| `bun test`             | テストを実行                             |
-| `bun run lint`         | Oxlintでコードをチェック                 |
-| `bun run format`       | Oxfmtでプロジェクトをフォーマット        |
-| `bun run format:check` | ファイルを変更せずフォーマットをチェック |
-| `bun run build`        | 本番用ビルドを作成                       |
-| `bun run deploy`       | Wranglerで本番用ビルドをデプロイ         |
+| コマンド                                         | 説明                                     |
+| ------------------------------------------------ | ---------------------------------------- |
+| `bun run dev`                                    | ローカル開発サーバーを起動               |
+| `bun test`                                       | テストを実行                             |
+| `bun run lint`                                   | Oxlintでコードをチェック                 |
+| `bun run format`                                 | Oxfmtでプロジェクトをフォーマット        |
+| `bun run format:check`                           | ファイルを変更せずフォーマットをチェック |
+| `bun run build`                                  | 本番用ビルドを作成                       |
+| `bun run refresh-rates --output /tmp/rates.json` | 最新金利を取得して検証                   |
+| `bun run deploy`                                 | Wranglerで本番用ビルドをデプロイ         |
 
 ## 金利データ
 
-現在の金利データは [`data/rates.json`](data/rates.json) に保存されています。各レコードには、
-金融機関、商品名、期間、表示金利、適用条件、参照元URL、必要な中国語訳が含まれます。
+本番環境の最新金利はCloudflare KV bindingの `RATES_KV` から読み込みます。GitHub Actionsが
+毎日午前10時（JST）に価格.comを取得・検証し、`rates:latest` と日付別の
+`rates:snapshot:YYYY-MM-DD` を書き込みます。[`data/rates.json`](data/rates.json) はローカル開発、
+初回デプロイ、KVが一時的に利用できない場合のフォールバックです。
 
-金利を更新するときは、次の点を確認してください。
-
-1. 各金利カテゴリーに10件のレコードを残す。
-2. 数値フィールド `rate` の昇順で並べる。
-3. `app/page.tsx` に表示するデータ基準日を更新する。
-4. `bun test` を実行してデータを検証する。
+各カテゴリーに金利順の有効なプランが10件あり、3つの価格.comページの基準日が一致した場合だけ
+KVを更新します。既存データと一致するプランは中国語訳を引き継ぎ、新規プランは翻訳されるまで
+日本語を表示します。
 
 将来のグラフ設定は [`data/trends.json`](data/trends.json) に保存されています。月次スナップショットが
 揃うまで、推移グラフのセクションは表示されません。
@@ -56,6 +56,10 @@ bun run dev
 `main` へのpushは [GitHub Actions](.github/workflows/deploy.yml) を通じて自動的にデプロイされます。
 ワークフローはBunで依存関係をインストールし、テストとOxcチェックを実行してサイトをビルドした後、
 Wranglerで `lending-rate` Workerをデプロイします。
+
+[金利更新ワークフロー](.github/workflows/refresh-rates.yml) は毎日午前10時（JST）に実行され、
+手動実行にも対応します。初回デプロイ時にWranglerが `RATES_KV` namespaceを自動作成し、
+Workerへbindingします。
 
 ワークフローを実行する前に、リポジトリへ次のsecretsを設定してください。
 

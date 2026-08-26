@@ -26,28 +26,27 @@ Open [http://localhost:6565](http://localhost:6565).
 
 ## Commands
 
-| Command                | Description                        |
-| ---------------------- | ---------------------------------- |
-| `bun run dev`          | Start the local development server |
-| `bun test`             | Run the test suite                 |
-| `bun run lint`         | Check the code with Oxlint         |
-| `bun run format`       | Format the project with Oxfmt      |
-| `bun run format:check` | Check formatting without changes   |
-| `bun run build`        | Create the production build        |
-| `bun run deploy`       | Deploy the build with Wrangler     |
+| Command                                          | Description                         |
+| ------------------------------------------------ | ----------------------------------- |
+| `bun run dev`                                    | Start the local development server  |
+| `bun test`                                       | Run the test suite                  |
+| `bun run lint`                                   | Check the code with Oxlint          |
+| `bun run format`                                 | Format the project with Oxfmt       |
+| `bun run format:check`                           | Check formatting without changes    |
+| `bun run build`                                  | Create the production build         |
+| `bun run refresh-rates --output /tmp/rates.json` | Fetch and validate the latest rates |
+| `bun run deploy`                                 | Deploy the build with Wrangler      |
 
 ## Rate Data
 
-Current rates are stored in [`data/rates.json`](data/rates.json). Each record contains the
-financial institution, product name, term, display rate, conditions, source URL, and Chinese
-translations where needed.
+Current production rates are read from the `RATES_KV` Cloudflare KV binding. GitHub Actions fetches
+and validates Kakaku.com at 10:00 JST every day, then writes `rates:latest` and a dated
+`rates:snapshot:YYYY-MM-DD` snapshot. [`data/rates.json`](data/rates.json) is the bundled fallback
+for local development, the first deployment, or a temporarily unavailable KV value.
 
-When updating rates:
-
-1. Keep ten records in each rate category.
-2. Sort records by the numeric `rate` field from low to high.
-3. Update the data date displayed in `app/page.tsx`.
-4. Run `bun test` to verify the data.
+Each category is accepted only when it contains ten valid plans sorted by numeric rate. All three
+Kakaku.com pages must also report the same source date before KV is updated. Existing Chinese copy
+is preserved when a plan matches the bundled data; new plans fall back to Japanese until translated.
 
 Future chart configuration lives in [`data/trends.json`](data/trends.json). The trend section
 remains hidden until monthly snapshots are available.
@@ -57,6 +56,10 @@ remains hidden until monthly snapshots are available.
 Pushes to `main` are deployed through [GitHub Actions](.github/workflows/deploy.yml). The workflow
 installs dependencies with Bun, runs tests and Oxc checks, builds the site, and deploys the
 `lending-rate` Worker with Wrangler.
+
+The [rate refresh workflow](.github/workflows/refresh-rates.yml) runs daily at 10:00 JST and can
+also be started manually. Wrangler automatically provisions the `RATES_KV` namespace on the first
+deployment and keeps it linked to the Worker.
 
 Configure these repository secrets before running the workflow:
 
