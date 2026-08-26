@@ -23,7 +23,7 @@ test("keeps the kakaku source attribution only in the footer", () => {
   expect(heroMeta).toContain("数据更新");
   expect(heroMeta).not.toContain("数据来源");
   expect(heroMeta).not.toContain("kakaku.com");
-  expect(footer).toContain("数据来源：价格.com");
+  expect(footer).toContain("数据来源：価格.com");
   expect(footer).toContain("https://kakaku.com/housing-loan/");
   expect(footer).toContain("日本住宅贷款利率比较");
   expect(footer).not.toContain("LoanScope");
@@ -89,7 +89,7 @@ test("renders the method copy as a quiet note instead of a feature block", () =>
 
   expect(method).toContain("说明");
   expect(method).toContain("<ol>");
-  expect(method).toContain("本页显示价格.com公布的适用利率下限或最低值");
+  expect(method).toContain("本页显示価格.com公布的适用利率下限或最低值");
   expect(method).not.toContain("<h2>");
   expect(method).not.toContain("NOTE");
   expect(method).not.toContain("先看清口径");
