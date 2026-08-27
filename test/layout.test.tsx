@@ -163,6 +163,14 @@ test("renders the one-year five-bank variable-rate trend", () => {
   expect(html).not.toContain("趋势图即将上线")
 })
 
+test("exposes every bank trend as an accessible interaction target", () => {
+  const html = renderToStaticMarkup(<Home />)
+
+  expect(html.match(/class="trend-focus-target"/g)).toHaveLength(5)
+  expect(html).toContain('aria-label="三菱UFJ银行"')
+  expect(html).toContain('aria-label="三井住友信托银行"')
+})
+
 test("keeps reading sizes at or above the review floor", async () => {
   const css = await Bun.file(new URL("../app/globals.css", import.meta.url)).text()
 

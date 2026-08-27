@@ -358,9 +358,13 @@ button {
   overscroll-behavior-inline: contain;
 }
 
+.trend-chart-stage {
+  min-width: 700px;
+  position: relative;
+}
+
 .trend-chart {
   display: block;
-  min-width: 700px;
   width: 100%;
 }
 
@@ -377,16 +381,84 @@ button {
 
 .trend-line {
   fill: none;
+  pointer-events: none;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.25;
+  transition:
+    opacity 120ms ease,
+    stroke-width 120ms ease;
   vector-effect: non-scaling-stroke;
 }
 
 .trend-point {
+  pointer-events: none;
   stroke: var(--white);
   stroke-width: 1.5;
+  transition:
+    opacity 120ms ease,
+    r 120ms ease;
   vector-effect: non-scaling-stroke;
+}
+
+.trend-series {
+  transition: opacity 120ms ease;
+}
+
+.trend-series--muted {
+  opacity: 0.18;
+}
+
+.trend-series--active .trend-line {
+  stroke-width: 4;
+}
+
+.trend-focus-target {
+  fill: none;
+  opacity: 0;
+  pointer-events: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 14;
+  vector-effect: non-scaling-stroke;
+}
+
+.trend-focus-target:focus-visible {
+  opacity: 0.18;
+  outline: none;
+}
+
+.trend-tooltip {
+  align-items: center;
+  background: var(--white);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 8px rgb(31 41 51 / 10%);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  max-width: 220px;
+  padding: 7px 9px;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(8px, calc(-100% - 8px));
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.trend-tooltip strong,
+.trend-tooltip b {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.trend-tooltip > span:not(.trend-tooltip-swatch) {
+  color: var(--muted);
+}
+
+.trend-tooltip-swatch {
+  flex: 0 0 auto;
+  height: 2px;
+  width: 10px;
 }
 
 .trend-legend {
@@ -405,6 +477,15 @@ button {
   gap: 7px;
   grid-template-columns: 8px minmax(0, 1fr) auto;
   min-width: 0;
+  transition: opacity 120ms ease;
+}
+
+.trend-legend-item--muted {
+  opacity: 0.28;
+}
+
+.trend-legend-item--active {
+  color: var(--ink);
 }
 
 .trend-legend li > span:nth-child(2) {
@@ -653,7 +734,7 @@ button {
     gap: 4px;
   }
 
-  .trend-chart {
+  .trend-chart-stage {
     min-width: 620px;
   }
 
@@ -667,5 +748,14 @@ button {
     flex-direction: column;
     gap: 9px;
     padding: 20px 16px 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trend-line,
+  .trend-point,
+  .trend-series,
+  .trend-legend li {
+    transition: none;
   }
 }
