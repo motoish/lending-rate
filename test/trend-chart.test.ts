@@ -1,6 +1,10 @@
 import { expect, test } from "bun:test"
 
-import { findTrendTarget, type InteractiveTrendSeries } from "@src/lib/trend-chart"
+import {
+  chooseTrendTooltipPlacement,
+  findTrendTarget,
+  type InteractiveTrendSeries,
+} from "@src/lib/trend-chart"
 
 const series: InteractiveTrendSeries[] = [
   {
@@ -33,4 +37,12 @@ test("returns the exact data point before the surrounding line", () => {
 
 test("does not activate a bank away from every trend line", () => {
   expect(findTrendTarget(series, { x: 50, y: 60 }, 8, 4)).toBeUndefined()
+})
+
+test("opens a right-half tooltip toward the chart", () => {
+  expect(chooseTrendTooltipPlacement(850, 100, 1000)).toBe("left")
+})
+
+test("opens a left-half tooltip toward the chart", () => {
+  expect(chooseTrendTooltipPlacement(250, 100, 1000)).toBe("right")
 })

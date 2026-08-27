@@ -15,6 +15,17 @@ export type TrendTarget = {
   pointIndex?: number
 }
 
+export type TrendTooltipPlacement = "left" | "right"
+
+export function chooseTrendTooltipPlacement(
+  pointerX: number,
+  viewportLeft: number,
+  viewportRight: number,
+): TrendTooltipPlacement {
+  const midpoint = viewportLeft + (viewportRight - viewportLeft) / 2
+  return pointerX > midpoint ? "left" : "right"
+}
+
 function squaredDistance(left: InteractiveTrendPoint, right: InteractiveTrendPoint) {
   return (left.x - right.x) ** 2 + (left.y - right.y) ** 2
 }

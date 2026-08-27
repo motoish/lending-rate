@@ -10,7 +10,12 @@ import {
   type RatesPayload,
   type RateType,
 } from "@src/lib/rates"
-import { findTrendTarget, type InteractiveTrendSeries } from "@src/lib/trend-chart"
+import {
+  chooseTrendTooltipPlacement,
+  findTrendTarget,
+  type InteractiveTrendSeries,
+  type TrendTooltipPlacement,
+} from "@src/lib/trend-chart"
 import { isTrendsPayload, type TrendBankId, type TrendsPayload } from "@src/lib/trends"
 import { type FocusEvent, type PointerEvent, useEffect, useMemo, useState } from "react"
 
@@ -227,7 +232,7 @@ function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayl
   const [interaction, setInteraction] = useState<{
     bankId: TrendBankId
     pointIndex?: number
-    position?: { x: number; y: number }
+    position?: { x: number; y: number; placement: TrendTooltipPlacement }
   }>()
   const width = 960
   const height = 320
@@ -277,11 +282,14 @@ function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayl
 
   function positionTooltip(event: PointerEvent<SVGSVGElement>) {
     const stage = event.currentTarget.closest<HTMLElement>(".trend-chart-stage")
-    if (!stage) return undefined
+    const scroll = event.currentTarget.closest<HTMLElement>(".trend-chart-scroll")
+    if (!stage || !scroll) return undefined
     const rect = stage.getBoundingClientRect()
+    const scrollRect = scroll.getBoundingClientRect()
     return {
-      x: Math.min(Math.max(event.clientX - rect.left, 8), Math.max(rect.width - 190, 8)),
+      x: Math.min(Math.max(event.clientX - rect.left, 8), Math.max(rect.width - 8, 8)),
       y: Math.max(event.clientY - rect.top, 48),
+      placement: chooseTrendTooltipPlacement(event.clientX, scrollRect.left, scrollRect.right),
     }
   }
 
@@ -315,8 +323,9 @@ function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayl
     setInteraction({
       bankId: series.bankId,
       position: {
-        x: Math.min((latest.x / width) * rect.width, Math.max(rect.width - 190, 8)),
+        x: Math.min((latest.x / width) * rect.width, Math.max(rect.width - 8, 8)),
         y: Math.max((latest.y / height) * rect.height, 48),
+        placement: "left",
       },
     })
   }
@@ -417,7 +426,7 @@ function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayl
             </svg>
             {activeSeries && interaction?.position ? (
               <div
-                className="trend-tooltip"
+                className={`trend-tooltip trend-tooltip--${interaction.position.placement}`}
                 role="status"
                 style={{ left: interaction.position.x, top: interaction.position.y }}
               >
