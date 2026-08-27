@@ -353,7 +353,15 @@ button {
   font-weight: 650;
 }
 
+.trend-chart-layout {
+  align-items: center;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 210px;
+}
+
 .trend-chart-scroll {
+  min-width: 0;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
 }
@@ -463,10 +471,10 @@ button {
 
 .trend-legend {
   display: grid;
-  gap: 8px 20px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
   list-style: none;
-  margin: 18px 0 0;
+  margin: 0;
   padding: 0;
 }
 
@@ -738,9 +746,13 @@ button {
     min-width: 620px;
   }
 
+  .trend-chart-layout {
+    display: block;
+  }
+
   .trend-legend {
-    gap: 9px 14px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 16px;
   }
 
   .site-footer {

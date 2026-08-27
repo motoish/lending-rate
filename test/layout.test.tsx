@@ -171,6 +171,14 @@ test("exposes every bank trend as an accessible interaction target", () => {
   expect(html).toContain('aria-label="三井住友信托银行"')
 })
 
+test("groups the trend chart and bank legend in one responsive layout", () => {
+  const html = renderToStaticMarkup(<Home />)
+
+  expect(html).toMatch(
+    /<div class="trend-chart-layout"><div class="trend-chart-scroll">[\s\S]*<ul class="trend-legend">/,
+  )
+})
+
 test("keeps reading sizes at or above the review floor", async () => {
   const css = await Bun.file(new URL("../app/globals.css", import.meta.url)).text()
 

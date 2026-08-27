@@ -335,131 +335,133 @@ function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayl
           </span>
         </div>
       </div>
-      <div className="trend-chart-scroll">
-        <div className="trend-chart-stage">
-          <svg
-            className="trend-chart"
-            viewBox={`0 0 ${width} ${height}`}
-            role="img"
-            aria-label={t.trendAria}
-            onPointerMove={handleChartPointerMove}
-            onPointerLeave={() => setInteraction(undefined)}
-          >
-            <title>{t.trendAria}</title>
-            {yTicks.map((tick) => (
-              <g key={tick}>
-                <line
-                  className="trend-grid"
-                  x1={left}
-                  x2={width - right}
-                  y1={y(tick)}
-                  y2={y(tick)}
-                />
-                <text className="trend-axis-label" x={left - 10} y={y(tick) + 4} textAnchor="end">
-                  {tick.toFixed(2)}%
-                </text>
-              </g>
-            ))}
-            {months.map((month, index) =>
-              visibleLabels.has(index) ? (
-                <text
-                  className="trend-axis-label"
-                  key={month}
-                  x={x(month)}
-                  y={height - 14}
-                  textAnchor={
-                    index === 0 ? "start" : index === months.length - 1 ? "end" : "middle"
-                  }
-                >
-                  {month.replace("-", "/")}
-                </text>
-              ) : null,
-            )}
-            {plottedSeries.map((series) => {
-              const color = trendColors[series.bankId]
-              const state = interaction
-                ? interaction.bankId === series.bankId
-                  ? "active"
-                  : "muted"
-                : "idle"
-              const polylinePoints = series.chartPoints
-                .map((point) => `${point.x},${point.y}`)
-                .join(" ")
-              return (
-                <g className={`trend-series trend-series--${state}`} key={series.bankId}>
-                  <polyline className="trend-line" points={polylinePoints} stroke={color} />
-                  <polyline
-                    className="trend-focus-target"
-                    points={polylinePoints}
-                    stroke={color}
-                    tabIndex={0}
-                    role="img"
-                    aria-label={bankName(series)}
-                    onFocus={(event) => handleSeriesFocus(event, series)}
-                    onBlur={() => setInteraction(undefined)}
-                  />
-                  {series.points.map((point, pointIndex) => (
-                    <circle
-                      className="trend-point"
-                      key={point.month}
-                      cx={series.chartPoints[pointIndex].x}
-                      cy={series.chartPoints[pointIndex].y}
-                      r={state === "active" ? 4 : 3}
-                      fill={color}
-                    >
-                      <title>{`${bankName(series)}・${formatTrendMonth(point.month, locale)}・${point.rate.toFixed(3)}%`}</title>
-                    </circle>
-                  ))}
-                </g>
-              )
-            })}
-          </svg>
-          {activeSeries && interaction?.position ? (
-            <div
-              className="trend-tooltip"
-              role="status"
-              style={{ left: interaction.position.x, top: interaction.position.y }}
-            >
-              <span
-                className="trend-tooltip-swatch"
-                style={{ backgroundColor: trendColors[activeSeries.bankId] }}
-              />
-              <strong>{bankName(activeSeries)}</strong>
-              {activePoint ? (
-                <>
-                  <span>{formatTrendMonth(activePoint.month, locale)}</span>
-                  <b>{activePoint.rate.toFixed(3)}%</b>
-                </>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </div>
-      <ul className="trend-legend">
-        {trends.series.map((series) => {
-          const latest = series.points.at(-1)
-          const state = interaction
-            ? interaction.bankId === series.bankId
-              ? "active"
-              : "muted"
-            : "idle"
-          return (
-            <li
-              className={`trend-legend-item trend-legend-item--${state}`}
-              key={series.bankId}
-              onPointerEnter={() => setInteraction({ bankId: series.bankId })}
+      <div className="trend-chart-layout">
+        <div className="trend-chart-scroll">
+          <div className="trend-chart-stage">
+            <svg
+              className="trend-chart"
+              viewBox={`0 0 ${width} ${height}`}
+              role="img"
+              aria-label={t.trendAria}
+              onPointerMove={handleChartPointerMove}
               onPointerLeave={() => setInteraction(undefined)}
             >
-              <span
-                className="trend-swatch"
-                style={{ backgroundColor: trendColors[series.bankId] }}
-              />
-              <span>{locale === "zh" ? series.bankZh : series.bank}</span>
-              <strong>{latest?.rate.toFixed(3)}%</strong>
-            </li>
-          )
-        })}
-      </ul>
+              <title>{t.trendAria}</title>
+              {yTicks.map((tick) => (
+                <g key={tick}>
+                  <line
+                    className="trend-grid"
+                    x1={left}
+                    x2={width - right}
+                    y1={y(tick)}
+                    y2={y(tick)}
+                  />
+                  <text className="trend-axis-label" x={left - 10} y={y(tick) + 4} textAnchor="end">
+                    {tick.toFixed(2)}%
+                  </text>
+                </g>
+              ))}
+              {months.map((month, index) =>
+                visibleLabels.has(index) ? (
+                  <text
+                    className="trend-axis-label"
+                    key={month}
+                    x={x(month)}
+                    y={height - 14}
+                    textAnchor={
+                      index === 0 ? "start" : index === months.length - 1 ? "end" : "middle"
+                    }
+                  >
+                    {month.replace("-", "/")}
+                  </text>
+                ) : null,
+              )}
+              {plottedSeries.map((series) => {
+                const color = trendColors[series.bankId]
+                const state = interaction
+                  ? interaction.bankId === series.bankId
+                    ? "active"
+                    : "muted"
+                  : "idle"
+                const polylinePoints = series.chartPoints
+                  .map((point) => `${point.x},${point.y}`)
+                  .join(" ")
+                return (
+                  <g className={`trend-series trend-series--${state}`} key={series.bankId}>
+                    <polyline className="trend-line" points={polylinePoints} stroke={color} />
+                    <polyline
+                      className="trend-focus-target"
+                      points={polylinePoints}
+                      stroke={color}
+                      tabIndex={0}
+                      role="img"
+                      aria-label={bankName(series)}
+                      onFocus={(event) => handleSeriesFocus(event, series)}
+                      onBlur={() => setInteraction(undefined)}
+                    />
+                    {series.points.map((point, pointIndex) => (
+                      <circle
+                        className="trend-point"
+                        key={point.month}
+                        cx={series.chartPoints[pointIndex].x}
+                        cy={series.chartPoints[pointIndex].y}
+                        r={state === "active" ? 4 : 3}
+                        fill={color}
+                      >
+                        <title>{`${bankName(series)}・${formatTrendMonth(point.month, locale)}・${point.rate.toFixed(3)}%`}</title>
+                      </circle>
+                    ))}
+                  </g>
+                )
+              })}
+            </svg>
+            {activeSeries && interaction?.position ? (
+              <div
+                className="trend-tooltip"
+                role="status"
+                style={{ left: interaction.position.x, top: interaction.position.y }}
+              >
+                <span
+                  className="trend-tooltip-swatch"
+                  style={{ backgroundColor: trendColors[activeSeries.bankId] }}
+                />
+                <strong>{bankName(activeSeries)}</strong>
+                {activePoint ? (
+                  <>
+                    <span>{formatTrendMonth(activePoint.month, locale)}</span>
+                    <b>{activePoint.rate.toFixed(3)}%</b>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <ul className="trend-legend">
+          {trends.series.map((series) => {
+            const latest = series.points.at(-1)
+            const state = interaction
+              ? interaction.bankId === series.bankId
+                ? "active"
+                : "muted"
+              : "idle"
+            return (
+              <li
+                className={`trend-legend-item trend-legend-item--${state}`}
+                key={series.bankId}
+                onPointerEnter={() => setInteraction({ bankId: series.bankId })}
+                onPointerLeave={() => setInteraction(undefined)}
+              >
+                <span
+                  className="trend-swatch"
+                  style={{ backgroundColor: trendColors[series.bankId] }}
+                />
+                <span>{locale === "zh" ? series.bankZh : series.bank}</span>
+                <strong>{latest?.rate.toFixed(3)}%</strong>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
     </section>
   )
 }
