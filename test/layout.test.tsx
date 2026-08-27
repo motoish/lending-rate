@@ -163,6 +163,12 @@ test("renders the one-year five-bank variable-rate trend", () => {
   expect(html).not.toContain("趋势图即将上线")
 })
 
+test("does not expose a native title tooltip for the whole trend chart", () => {
+  const html = renderToStaticMarkup(<Home />)
+
+  expect(html).not.toContain("<title>五大银行近一年变动利率折线图</title>")
+})
+
 test("exposes every bank trend as an accessible interaction target", () => {
   const html = renderToStaticMarkup(<Home />)
 
@@ -199,5 +205,7 @@ test("keeps reading sizes at or above the review floor", async () => {
   expect(css).toMatch(/\.table-shell \{[^}]*border-top: 1px solid var\(--line\);/s)
   expect(css).not.toMatch(/\.table-shell \{[^}]*border: 1px solid var\(--line\);/s)
   expect(css).toMatch(/\.term \{[^}]*white-space: nowrap;/s)
+  expect(css).toMatch(/\.trend-tooltip \{[^}]*width: max-content;/s)
+  expect(css).not.toMatch(/\.trend-tooltip \{[^}]*max-width:/s)
   expect(css).toMatch(/@media \(max-width: 700px\) \{[\s\S]*td:nth-child\(3\),[\s\S]*width: auto;/)
 })

@@ -444,11 +444,11 @@ button {
   display: flex;
   font-size: 12px;
   gap: 8px;
-  max-width: 220px;
   padding: 7px 9px;
   pointer-events: none;
   position: absolute;
   white-space: nowrap;
+  width: max-content;
   z-index: 1;
 }
 

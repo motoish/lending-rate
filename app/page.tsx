@@ -355,7 +355,6 @@ function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayl
               onPointerMove={handleChartPointerMove}
               onPointerLeave={() => setInteraction(undefined)}
             >
-              <title>{t.trendAria}</title>
               {yTicks.map((tick) => (
                 <g key={tick}>
                   <line
