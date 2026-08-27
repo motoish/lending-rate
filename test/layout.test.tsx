@@ -67,6 +67,23 @@ test("keeps the page title and language controls together without a separate hea
   expect(headingRow).toContain('class="language-toggle"')
 })
 
+test("renders scroll controls in the right-side page nav", () => {
+  const html = renderToStaticMarkup(<Home />)
+  const navTag = html.match(/<nav class="page-nav"[^>]*>/)?.[0]
+  const nav = html.match(/<nav class="page-nav"[^>]*>(.*?)<\/nav>/s)?.[1]
+
+  expect(navTag).toContain('aria-label="页面导航"')
+  expect(navTag).toContain('aria-hidden="true"')
+  expect(navTag).not.toContain("page-nav--visible")
+  expect(nav).toContain('aria-label="上一段"')
+  expect(nav).toContain('aria-label="下一段"')
+  expect(nav).toContain('aria-label="返回顶部"')
+  expect(nav?.match(/class="page-nav-button"/g)).toHaveLength(3)
+  expect(nav?.match(/page-nav-icon/g)?.length).toBeGreaterThanOrEqual(3)
+  expect(nav).not.toContain("⬆️")
+  expect(nav).not.toContain('href="#variable"')
+})
+
 test("treats the rate type as the section title without a plan subtitle", () => {
   const html = renderToStaticMarkup(<Home />)
   const variableSection = html.match(/<section id="variable"[^>]*>(.*?)<\/section>/s)?.[1]

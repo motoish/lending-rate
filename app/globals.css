@@ -66,6 +66,73 @@ button {
   font-weight: 650;
 }
 
+.page-nav {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .page-nav {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    visibility: hidden;
+    z-index: 30;
+  }
+
+  .page-nav--visible {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .page-nav-button {
+    align-items: center;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    display: inline-flex;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+    width: 40px;
+  }
+
+  .page-nav-button:hover {
+    background: var(--paper);
+    border-color: #cfd5da;
+    color: var(--ink);
+  }
+
+  .page-nav-icon {
+    display: block;
+    fill: none;
+    height: 16px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+    width: 16px;
+  }
+
+  .page-nav-icon--down {
+    transform: rotate(180deg);
+  }
+}
+
 .hero-wrap {
   background: var(--paper);
   border-bottom: 1px solid var(--line);
@@ -771,6 +838,7 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .page-nav,
   .trend-line,
   .trend-point,
   .trend-series,

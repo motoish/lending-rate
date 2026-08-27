@@ -17,7 +17,7 @@ import {
   type TrendTooltipPlacement,
 } from "@src/lib/trend-chart"
 import { isTrendsPayload, type TrendBankId, type TrendsPayload } from "@src/lib/trends"
-import { type FocusEvent, type PointerEvent, useEffect, useMemo, useState } from "react"
+import { type FocusEvent, type PointerEvent, useEffect, useMemo, useRef, useState } from "react"
 
 type Locale = "zh" | "ja"
 
@@ -28,6 +28,10 @@ const bundledTrends = trendsData
 
 const copy = {
   zh: {
+    navLabel: "页面导航",
+    navUp: "上一段",
+    navDown: "下一段",
+    navTop: "返回顶部",
     navTrend: "变化趋势",
     navMethod: "说明",
     eyebrow: "日本住宅贷款利率概要",
@@ -60,6 +64,10 @@ const copy = {
     disclaimer: "本页面仅供信息参考，不构成金融建议。",
   },
   ja: {
+    navLabel: "ページ内ナビ",
+    navUp: "前のセクション",
+    navDown: "次のセクション",
+    navTop: "ページ先頭へ",
     navTrend: "推移グラフ",
     navMethod: "見方",
     eyebrow: "日本住宅ローン金利情報",
@@ -110,6 +118,8 @@ function localizedField(entry: RateEntry, locale: Locale, field: "product" | "te
 
 const visibleRowCount = 5
 const localeStorageKey = "lending-rate-locale"
+const pageSections = ["top", "variable", "fixed", "full", "trend", "method"] as const
+const pageNavHideDelayMs = 900
 const trendColors: Record<TrendBankId, string> = {
   mufg: "#c23b33",
   smbc: "#16705c",
@@ -143,6 +153,61 @@ function persistLocale(locale: Locale) {
   } catch {
     return
   }
+}
+
+function currentPageSectionIndex() {
+  const marker = window.scrollY + Math.min(120, window.innerHeight * 0.2)
+  let index = 0
+  for (let i = 0; i < pageSections.length; i += 1) {
+    const section = document.getElementById(pageSections[i])
+    if (!section) continue
+    if (section.offsetTop <= marker) index = i
+  }
+  return index
+}
+
+function scrollToPageSection(id: (typeof pageSections)[number]) {
+  const section = document.getElementById(id)
+  if (!section) return
+  section.scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
+function scrollPageNav(direction: "up" | "down" | "top") {
+  if (direction === "top") {
+    scrollToPageSection("top")
+    return
+  }
+  const current = currentPageSectionIndex()
+  const next =
+    direction === "up" ? Math.max(current - 1, 0) : Math.min(current + 1, pageSections.length - 1)
+  if (next === current && direction === "up" && window.scrollY > 0) {
+    scrollToPageSection("top")
+    return
+  }
+  scrollToPageSection(pageSections[next])
+}
+
+function PageNavIcon({ kind }: { kind: "up" | "down" | "top" }) {
+  if (kind === "top") {
+    return (
+      <svg className="page-nav-icon" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M3 3.5h10" />
+        <path d="M8 13V5.5" />
+        <path d="M4.5 8.5 8 5l3.5 3.5" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg
+      className={kind === "down" ? "page-nav-icon page-nav-icon--down" : "page-nav-icon"}
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+    >
+      <path d="M8 12.5V4" />
+      <path d="M4.5 7.5 8 4l3.5 3.5" />
+    </svg>
+  )
 }
 
 function RateTable({
@@ -485,6 +550,9 @@ export function LendingRatePage({
   const [rates, setRates] = useState(initialRates)
   const [trends, setTrends] = useState(initialTrends)
   const [isHydrated, setIsHydrated] = useState(false)
+  const [isPageNavVisible, setIsPageNavVisible] = useState(false)
+  const isPageNavHeldRef = useRef(false)
+  const hidePageNavTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const t = copy[locale]
   const summary = useMemo(
     () => rateTypes.map((key) => ({ key, value: rates[key][0].displayRate })),
@@ -495,6 +563,33 @@ export function LendingRatePage({
     const saved = readStoredLocale()
     if (saved) setLocale(saved)
     setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    function clearHideTimer() {
+      if (!hidePageNavTimerRef.current) return
+      clearTimeout(hidePageNavTimerRef.current)
+      hidePageNavTimerRef.current = null
+    }
+
+    function scheduleHide() {
+      clearHideTimer()
+      hidePageNavTimerRef.current = setTimeout(() => {
+        if (isPageNavHeldRef.current) return
+        setIsPageNavVisible(false)
+      }, pageNavHideDelayMs)
+    }
+
+    function showNav() {
+      setIsPageNavVisible(true)
+      scheduleHide()
+    }
+
+    window.addEventListener("scroll", showNav, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", showNav)
+      clearHideTimer()
+    }
   }, [])
 
   useEffect(() => {
@@ -539,8 +634,58 @@ export function LendingRatePage({
     return () => controller.abort()
   }, [])
 
+  const pageNav = [
+    { action: "up" as const, label: t.navUp, icon: "up" as const },
+    { action: "down" as const, label: t.navDown, icon: "down" as const },
+    { action: "top" as const, label: t.navTop, icon: "top" as const },
+  ]
+
+  function holdPageNav() {
+    isPageNavHeldRef.current = true
+    setIsPageNavVisible(true)
+    if (hidePageNavTimerRef.current) {
+      clearTimeout(hidePageNavTimerRef.current)
+      hidePageNavTimerRef.current = null
+    }
+  }
+
+  function releasePageNav() {
+    isPageNavHeldRef.current = false
+    if (hidePageNavTimerRef.current) clearTimeout(hidePageNavTimerRef.current)
+    hidePageNavTimerRef.current = setTimeout(() => {
+      if (isPageNavHeldRef.current) return
+      setIsPageNavVisible(false)
+    }, pageNavHideDelayMs)
+  }
+
   return (
     <main>
+      <nav
+        className={isPageNavVisible ? "page-nav page-nav--visible" : "page-nav"}
+        aria-label={t.navLabel}
+        aria-hidden={!isPageNavVisible}
+        onPointerEnter={holdPageNav}
+        onPointerLeave={releasePageNav}
+        onFocusCapture={holdPageNav}
+        onBlurCapture={(event) => {
+          if (event.currentTarget.contains(event.relatedTarget as Node | null)) return
+          releasePageNav()
+        }}
+      >
+        {pageNav.map((item) => (
+          <button
+            type="button"
+            className="page-nav-button"
+            key={item.action}
+            aria-label={item.label}
+            title={item.label}
+            tabIndex={isPageNavVisible ? 0 : -1}
+            onClick={() => scrollPageNav(item.action)}
+          >
+            <PageNavIcon kind={item.icon} />
+          </button>
+        ))}
+      </nav>
       <div id="top" className="hero-wrap">
         <section className="hero">
           <div className="hero-heading">
