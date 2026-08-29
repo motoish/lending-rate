@@ -28,18 +28,30 @@ function productIdentity(value: string) {
   return identity(value.replace(/住宅ローン/g, "").replace(/\s+(?:変動|固定|全期間固定).*$/u, ""))
 }
 
+function translateTerm(term: string) {
+  return term
+    .replace(/^全期間固定金利/u, "全期间固定利率")
+    .replace(/^全期間固定/u, "全期间固定")
+    .replace(/^固定金利/u, "固定利率")
+    .replace(/^変動金利/u, "变动利率")
+    .replace(/^変動/u, "变动")
+    .replace(/[〜～]/gu, "–")
+}
+
 function existingTranslation(entries: RateEntry[], bank: string, product: string) {
   const normalizedBank = identity(bank)
   const normalizedProduct = productIdentity(product)
   return entries.find((entry) => {
     if (identity(entry.bank) !== normalizedBank) return false
     const candidate = productIdentity(entry.product)
-    return (
-      candidate.length > 0 &&
-      normalizedProduct.length > 0 &&
-      (candidate.includes(normalizedProduct) || normalizedProduct.includes(candidate))
-    )
+    return candidate.length > 0 && normalizedProduct.length > 0 && candidate === normalizedProduct
   })
+}
+
+function translatedNote(entry: RateEntry | undefined, note: string) {
+  if (!note) return ""
+  if (entry && clean(entry.note) === note && entry.noteZh) return entry.noteZh
+  return note
 }
 
 export function parseKakakuPage(
@@ -81,11 +93,11 @@ export function parseKakakuPage(
       product,
       productZh: translated?.productZh ?? product,
       term,
-      termZh: translated?.termZh ?? term,
+      termZh: translateTerm(term),
       rate,
       displayRate: `${rate.toFixed(3)}%`,
       note,
-      noteZh: translated?.noteZh ?? note,
+      noteZh: translatedNote(translated, note),
       source: new URL(href, sourceUrl).toString(),
     })
   })

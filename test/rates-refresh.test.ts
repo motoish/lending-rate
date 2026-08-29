@@ -22,6 +22,7 @@ function rateItem(
   const bank = options.bank ?? `銀行${index}`
   const product = options.product ?? `住宅ローン${index}`
   const term = options.term ?? "変動金利"
+  const note = options.note ?? `条件${index}`
 
   return `
     <li class="p-planSearchList_item">
@@ -36,7 +37,7 @@ function rateItem(
       </div>
       <span class="p-item_rate"><span class="p-item_rate_txt">年</span>${rate.toFixed(3)}<span class="p-item_rate_sub">%</span></span>
       <span class="p-item_rate_date">（${options.date ?? "2026/08/01"} 時点）</span>
-      <ul class="c-planCamp_note"><li class="c-planCamp_note_item">条件${index}</li></ul>
+      <ul class="c-planCamp_note"><li class="c-planCamp_note_item">${note}</li></ul>
     </li>`
 }
 
@@ -66,7 +67,7 @@ describe("parseKakakuPage", () => {
     expect(result.entries[0].source).toBe("https://kakaku.com/housing-loan/item.asp?id=4")
   })
 
-  test("keeps known Chinese copy and falls back to Japanese for a new plan", () => {
+  test("keeps exact known Chinese copy and safely handles a new plan", () => {
     const known: RateEntry = {
       bank: "既存銀行",
       product: "既存商品",
@@ -88,14 +89,100 @@ describe("parseKakakuPage", () => {
 
     expect(result.entries[0]).toMatchObject({
       productZh: "现有产品",
-      termZh: "浮动利率",
+      termZh: "变动利率",
       noteZh: "既有条件说明",
     })
     expect(result.entries[1]).toMatchObject({
       productZh: "住宅ローン2",
-      termZh: "変動金利",
+      termZh: "变动利率",
       noteZh: "条件2",
     })
+  })
+
+  test("derives the Chinese term from the current plan instead of a stale match", () => {
+    const existing = emptyRates()
+    existing.fixed.push({
+      bank: "同一銀行",
+      product: "住宅ローン 当初引下げプラン",
+      productZh: "住宅贷款（初期下调方案）",
+      term: "固定3年",
+      termZh: "固定3年",
+      rate: 2.1,
+      displayRate: "2.100%",
+      note: "",
+      noteZh: "",
+      source: sourceUrl,
+    })
+    const items = [
+      rateItem(1, 1.9, {
+        bank: "同一銀行",
+        product: "住宅ローン 当初引下げプラン 固定2年",
+        term: "固定金利2年",
+      }),
+    ]
+    for (let index = 2; index <= 10; index += 1) items.push(rateItem(index, 2 + index / 100))
+
+    const result = parseKakakuPage(page(items), "fixed", sourceUrl, existing)
+
+    expect(result.entries[0]).toMatchObject({
+      productZh: "住宅贷款（初期下调方案）",
+      termZh: "固定利率2年",
+    })
+  })
+
+  test("does not reuse a translated note after the Japanese source changes", () => {
+    const existing = emptyRates()
+    existing.variable.push({
+      bank: "同一銀行",
+      product: "住宅ローン 標準プラン",
+      productZh: "住宅贷款（标准方案）",
+      term: "変動",
+      termZh: "变动",
+      rate: 0.8,
+      displayRate: "0.800%",
+      note: "以前の条件",
+      noteZh: "旧条件",
+      source: sourceUrl,
+    })
+    const items = [
+      rateItem(1, 0.8, {
+        bank: "同一銀行",
+        product: "住宅ローン 標準プラン 変動",
+        note: "新しい詳しい条件",
+      }),
+    ]
+    for (let index = 2; index <= 10; index += 1) items.push(rateItem(index, 0.8 + index / 100))
+
+    const result = parseKakakuPage(page(items), "variable", sourceUrl, existing)
+
+    expect(result.entries[0].noteZh).toBe("新しい詳しい条件")
+  })
+
+  test("does not reuse a translation from a merely similar product name", () => {
+    const existing = emptyRates()
+    existing.variable.push({
+      bank: "同一銀行",
+      product: "住宅ローン スマートプラン",
+      productZh: "住宅贷款（智能方案）",
+      term: "変動",
+      termZh: "变动",
+      rate: 0.8,
+      displayRate: "0.800%",
+      note: "",
+      noteZh: "",
+      source: sourceUrl,
+    })
+    const items = [
+      rateItem(1, 0.8, {
+        bank: "同一銀行",
+        product: "住宅ローン スマートプランプレミアム 変動",
+      }),
+    ]
+    for (let index = 2; index <= 10; index += 1) items.push(rateItem(index, 0.8 + index / 100))
+
+    const result = parseKakakuPage(page(items), "variable", sourceUrl, existing)
+
+    expect(result.entries[0].productZh).toBe("住宅ローン スマートプランプレミアム 変動")
   })
 
   test("rejects a page that cannot provide a complete top ten", () => {
