@@ -8,7 +8,6 @@ on:
       - "app/**"
       - "data/**"
       - "lib/**"
-      - "public/**"
       - "scripts/**"
       - "test/**"
       - "package.json"

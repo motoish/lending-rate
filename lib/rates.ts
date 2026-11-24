@@ -23,7 +23,7 @@ export type RatesPayload = RatesByType & {
 
 export const rateTypes: RateType[] = ["variable", "fixed", "full"]
 
-export function formatRateDate(value: string, _locale: "zh" | "ja") {
+export function formatRateDate(value: string) {
   const match = value.match(/^(\d{4})-(\d{2})-\d{2}$/)
   if (!match) return value
   return `${match[1]}年${Number(match[2])}月`

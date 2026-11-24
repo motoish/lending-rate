@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: refresh-KV
+  group: refresh-rates
   cancel-in-progress: true
 
 jobs:

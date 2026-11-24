@@ -1,6 +1,13 @@
 import { expect, test } from "bun:test"
 
-import { formatRateDate, type RateEntry, type RatesPayload } from "@src/lib/rates"
+import bundledRates from "@src/data/rates.json"
+import {
+  formatRateDate,
+  isRatesPayload,
+  rateTypes,
+  type RateEntry,
+  type RatesPayload,
+} from "@src/lib/rates"
 import { loadRates } from "@src/lib/rates-store"
 
 function entry(index: number): RateEntry {
@@ -44,7 +51,18 @@ test("uses bundled data when KV is empty or malformed", async () => {
   ).resolves.toEqual(fallback)
 })
 
-test("formats the payload source month for both interfaces", () => {
-  expect(formatRateDate("2026-08-01", "zh")).toBe("2026年8月")
-  expect(formatRateDate("2026-08-01", "ja")).toBe("2026年8月")
+test("formats the payload source month", () => {
+  expect(formatRateDate("2026-08-01")).toBe("2026年8月")
+})
+
+test("keeps a valid bundled rates payload without latin risona in Chinese copy", () => {
+  expect(isRatesPayload(bundledRates)).toBe(true)
+  if (!isRatesPayload(bundledRates)) return
+
+  for (const type of rateTypes) {
+    for (const entry of bundledRates[type]) {
+      expect(entry.productZh.toLowerCase()).not.toContain("risona")
+      expect(entry.noteZh.toLowerCase()).not.toContain("risona")
+    }
+  }
 })

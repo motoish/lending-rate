@@ -32,7 +32,6 @@ const copy = {
     navUp: "上一段",
     navDown: "下一段",
     navTop: "返回顶部",
-    navTrend: "变化趋势",
     navMethod: "说明",
     eyebrow: "日本住宅贷款利率概要",
     updated: "数据更新",
@@ -68,7 +67,6 @@ const copy = {
     navUp: "前のセクション",
     navDown: "次のセクション",
     navTop: "ページ先頭へ",
-    navTrend: "推移グラフ",
     navMethod: "見方",
     eyebrow: "日本住宅ローン金利情報",
     updated: "データ基準日",
@@ -405,7 +403,7 @@ function RateTrendChart({ locale, trends }: { locale: Locale; trends: TrendsPayl
         <div className="trend-meta">
           <strong>{t.trendPeriod}</strong>
           <span>
-            {t.trendUpdated} {formatRateDate(trends.updatedAt, locale)}
+            {t.trendUpdated} {formatRateDate(trends.updatedAt)}
           </span>
         </div>
       </div>
@@ -720,7 +718,7 @@ export function LendingRatePage({
           </div>
           <div className="hero-meta">
             <span>
-              {t.updated} <strong>{formatRateDate(rates.updatedAt, locale)}</strong>
+              {t.updated} <strong>{formatRateDate(rates.updatedAt)}</strong>
             </span>
           </div>
         </section>
