@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: refresh-lending-rates
+  group: refresh-KV
   cancel-in-progress: true
 
 jobs:
